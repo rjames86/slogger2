@@ -1,21 +1,25 @@
-from xml.etree.ElementTree import Element, SubElement, Comment, tostring
+class Location(object):
+    def __init__(self, administrative_area=None, latitude=None, longitude=None, place_name=None):
+        self.administrative_area = administrative_area
+        self.latitude = latitude
+        self.longitude = longitude
+        self.place_name = plance_name
 
-class XMLBuilder(object):
-    @staticmethod
-    def dict(key, elem):
-        d = Element('dict')
-        k = SubElement(d, 'key')
-        k.text = key
-        d.append(elem)
-        return d
 
 class DayOneEntry(object):
     """
     This class should output the XML that will be written to DayOne.journal/entries folder
     """
+    
+    def __init__(self, entry_text, created=None, tags=None, location=None, starred=False):
+        self.entry_text = entry_text
+        self.created = created
+        self.tags = tags
+        self.location = location
+        self.starred = starred
 
-    pass
 
+##TOREMOVE##
 
 """import csv
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring

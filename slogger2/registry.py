@@ -28,6 +28,11 @@ class Plugin(object):
     __metaclass__ = PluginMount
 
     DISABLED = False
+
+    tags = None
+    starred = False
+    location = None
+    
     
     def load(self, *paths):
         paths = list(paths)
@@ -43,3 +48,12 @@ class Plugin(object):
 
     def run(self):
         raise NotImplemented("You must implement `run` from within your plugin")
+
+class Plugins(list):
+    @classmethod
+    def get(cls):
+        self = cls()
+        plugin_class = Plugin()
+        plugin_class.load("slogger2/plugins")
+        self.extend(plugin_class.plugins)
+        return self

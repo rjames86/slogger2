@@ -1,7 +1,7 @@
 from instagram.client import InstagramAPI
 
-from registry import Plugin
-from config import (
+from slogger2.registry import Plugin
+from slogger2.config import (
     INSTAGRAM_TOKEN,
     INSTAGRAM_SECRET
 )
