@@ -47,6 +47,15 @@ class Plugin(object):
                 fid.close()
 
     def run(self):
+        """
+        Should return a list of objects which should map to a DayOneEntry object
+
+        ::entry_text (required)
+        ::created (optional)
+        ::tags (optional)
+        ::starred (optional)
+        ::location (optional)
+        """
         raise NotImplemented("You must implement `run` from within your plugin")
 
 class Plugins(list):
