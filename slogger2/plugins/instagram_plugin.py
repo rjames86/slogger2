@@ -1,12 +1,12 @@
 from instagram.client import InstagramAPI
 
-from slogger2.dayone_entry import (
+from dayone_entry import (
     DayOneEntry,
     Image,
     Location,
 )
-from slogger2.registry import Plugin
-from slogger2.config import (
+from registry import Plugin
+from config import (
     INSTAGRAM_TOKEN,
     INSTAGRAM_SECRET
 )
@@ -91,10 +91,9 @@ class Instagram(Plugin):
 
     def recent_media(self):
         to_ret = []
-        print "getting"
         rm, next_ = self.client.user_recent_media()
         to_ret.extend(rm)
-        # while next_:
-        #     rm, next_ = self.client.user_recent_media(with_next_url=next_)
-        #     to_ret.extend(rm)
+        while next_:
+            rm, next_ = self.client.user_recent_media(with_next_url=next_)
+            to_ret.extend(rm)
         return to_ret

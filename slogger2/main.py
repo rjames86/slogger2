@@ -1,4 +1,8 @@
-from registry import Plugin
+from registry import Plugins
 
-for plugin in Plugin.plugins:
-    print plugin
+def main():
+    plugins = Plugins.get()
+    print plugins
+
+if __name__ == '__main__':
+    main()

@@ -1,5 +1,6 @@
 import pkgutil
 import imp
+import os
 
 
 class PluginMount(type):
@@ -26,7 +27,6 @@ class PluginMount(type):
 
 
 class Plugin(object):
-    """A plugin which must provide a register_signals() method"""
     __metaclass__ = PluginMount
 
     DISABLED = False
@@ -65,6 +65,7 @@ class Plugins(list):
     def get(cls):
         self = cls()
         plugin_class = Plugin()
-        plugin_class.load("slogger2/plugins")
+        plugin_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "plugins")
+        plugin_class.load(plugin_path)
         self.extend(plugin_class.plugins)
         return self
