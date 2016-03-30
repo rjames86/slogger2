@@ -1,6 +1,7 @@
 import pkgutil
 import imp
 
+
 class PluginMount(type):
     def __init__(cls, name, bases, attrs):
         """Called when a Plugin derived class is imported"""
@@ -23,6 +24,7 @@ class PluginMount(type):
         # save the plugin reference
         cls.plugins.append(instance)
 
+
 class Plugin(object):
     """A plugin which must provide a register_signals() method"""
     __metaclass__ = PluginMount
@@ -32,8 +34,7 @@ class Plugin(object):
     tags = None
     starred = False
     location = None
-    
-    
+
     def load(self, *paths):
         paths = list(paths)
         for _, name, _ in pkgutil.iter_modules(paths):
@@ -57,6 +58,7 @@ class Plugin(object):
         ::location (optional)
         """
         raise NotImplemented("You must implement `run` from within your plugin")
+
 
 class Plugins(list):
     @classmethod

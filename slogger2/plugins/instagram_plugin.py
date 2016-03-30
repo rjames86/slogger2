@@ -1,5 +1,10 @@
 from instagram.client import InstagramAPI
 
+from slogger2.dayone_entry import (
+    DayOneEntry,
+    Image,
+    Location,
+)
 from slogger2.registry import Plugin
 from slogger2.config import (
     INSTAGRAM_TOKEN,
@@ -9,11 +14,14 @@ from slogger2.config import (
 TEMPLATE = """\
 # Instagram Photo
 
+{0.caption}
+
 ## Likes ({0.like_count})
 
 {0.likes}
 
 """
+
 
 class InstagramPhoto(object):
     def __init__(self, media, client):
@@ -28,14 +36,40 @@ class InstagramPhoto(object):
             raise AttributeError
 
     def __repr__(self):
+        return "<InstagramPhoto(%r)>" % self.media.id
+
+    @property
+    def caption(self):
+        return self.media.caption.text.encode('utf-8')
+
+    @property
+    def entry_text(self):
         return TEMPLATE.format(self)
+
+    @property
+    def image(self):
+        return Image(self.media.images['standard_resolution'])
+
+    @property
+    def location(self):
+        if hasattr(self.media, 'location'):
+            return Location(place_name=self.media.location.name, **self.media.location.point.__dict__)
+        return None
 
     @property
     def likes(self):
         to_ret = ""
         for person in [user.full_name or user.username for user in self.client.media_likes(self.media.id)]:
-            to_ret+= "- {0}\n".format(person)
+            to_ret += "- {0}\n".format(person.encode("utf-8")).decode('utf-8')
         return to_ret
+
+    @property
+    def starred(self):
+        return False
+
+    @property
+    def created(self):
+        return self.media.created_time
 
 
 class Instagram(Plugin):
@@ -52,18 +86,15 @@ class Instagram(Plugin):
         return self._client
 
     def run(self):
-        to_ret = []
-        for i in self.recent_media():
-            to_ret.append(InstagramPhoto(i, self.client))
-        return to_ret
+        instagram_photos = [InstagramPhoto(i, self.client) for i in self.recent_media()]
+        return map(DayOneEntry.from_object, instagram_photos)
 
     def recent_media(self):
         to_ret = []
         print "getting"
         rm, next_ = self.client.user_recent_media()
         to_ret.extend(rm)
-        while next_:
-            print "getting next"
-            rm, next_ = self.client.user_recent_media(with_next_url=next_)
-            to_ret.extend(rm)
+        # while next_:
+        #     rm, next_ = self.client.user_recent_media(with_next_url=next_)
+        #     to_ret.extend(rm)
         return to_ret
