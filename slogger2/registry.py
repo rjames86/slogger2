@@ -109,6 +109,7 @@ class Plugin(object):
         if self.cache_data() is not None:
             print "caching data"
             LastRun.save_plugin_info(self, self.cache_data())
+        LastRun.set_last_run()
 
 
 class Plugins(list):
