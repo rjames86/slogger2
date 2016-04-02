@@ -1,6 +1,7 @@
 import md5
 import uuid
 import requests
+import os
 
 
 class Location(object):
@@ -9,6 +10,15 @@ class Location(object):
         self.latitude = latitude
         self.longitude = longitude
         self.place_name = place_name
+
+    def to_dict(self):
+        return {
+            'Administrative Area': '',
+            'Country': '',
+            'Latitude': self.latitude,
+            'Longitude': self.longitude,
+            'Place Name': self.place_name
+        }
 
 
 class Image(object):
@@ -22,7 +32,13 @@ class Image(object):
             self._as_string = self.download_file()
         return self._as_string
 
+    def save_to_file(self, journal_location, uuid):
+        print "saving image to file"
+        with open(os.path.join(journal_location, "photos", "%s.jpg" % uuid), 'wb') as f:
+            f.write(self.as_string)
+
     def download_file(self):
+        print "downloading image", self.url
         to_ret = ""
         r = requests.get(self.url, stream=True)
         for chunk in r.iter_content(chunk_size=1024):
@@ -33,17 +49,22 @@ class Image(object):
 
 class DayOneEntry(object):
     def __init__(self, entry_text, created=None, tags=None, location=None, starred=False, image=None):
+        print "dayone entry creating"
         assert (isinstance(location, Location) or not location), "location must be an instance of Location"
         assert (isinstance(image, Image) or not image), "image must be an instance of Image"
 
         self.entry_text = entry_text
-        self.created = created
+        self._created = created
         self.tags = tags
         self.location = location
         self.starred = starred
         self.image = image
 
         self._uuid = None
+
+    @property
+    def created(self):
+        return self._created.isoformat()
 
     def __repr__(self):
         return "<DayOneEntry(%r)" % self.uuid

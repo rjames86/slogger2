@@ -40,7 +40,7 @@ class InstagramPhoto(object):
 
     @property
     def caption(self):
-        return self.media.caption.text.encode('utf-8')
+        return self.media.caption.text.encode('unicode_escape')
 
     @property
     def entry_text(self):
@@ -48,7 +48,7 @@ class InstagramPhoto(object):
 
     @property
     def image(self):
-        return Image(self.media.images['standard_resolution'])
+        return Image(self.media.images['standard_resolution'].url)
 
     @property
     def location(self):
@@ -60,8 +60,8 @@ class InstagramPhoto(object):
     def likes(self):
         to_ret = ""
         for person in [user.full_name or user.username for user in self.client.media_likes(self.media.id)]:
-            to_ret += "- {0}\n".format(person.encode("utf-8")).decode('utf-8')
-        return to_ret
+            to_ret += "- {0}\n".format(person.encode('unicode_escape'))
+        return to_ret.encode('unicode_escape')
 
     @property
     def starred(self):
@@ -76,8 +76,10 @@ class Instagram(Plugin):
     AUTH_TOKEN = INSTAGRAM_TOKEN
     SECRET = INSTAGRAM_SECRET
 
-    def __init__(self):
+    def __init__(self, context):
+        self.context = context
         self._client = None
+        self._recent_media = []
 
     @property
     def client(self):
@@ -89,11 +91,18 @@ class Instagram(Plugin):
         instagram_photos = [InstagramPhoto(i, self.client) for i in self.recent_media()]
         return map(DayOneEntry.from_object, instagram_photos)
 
-    def recent_media(self):
-        to_ret = []
-        rm, next_ = self.client.user_recent_media()
-        to_ret.extend(rm)
-        while next_:
-            rm, next_ = self.client.user_recent_media(with_next_url=next_)
-            to_ret.extend(rm)
+    def cache_data(self):
+        to_ret = {}
+        if self.recent_media():
+            to_ret['min_id'] = self.recent_media()[0].id
         return to_ret
+
+    def recent_media(self):
+        if not self._recent_media:
+            rm, next_ = self.client.user_recent_media(**self.context['cache'])
+            self._recent_media.extend(rm)
+            while next_:
+                print "getting recent media next..."
+                rm, next_ = self.client.user_recent_media(with_next_url=next_, **self.context)
+                self._recent_media.extend(rm)
+        return self._recent_media

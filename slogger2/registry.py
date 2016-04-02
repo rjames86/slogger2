@@ -2,6 +2,43 @@ import pkgutil
 import imp
 import os
 
+import shelve
+import datetime
+
+
+class LastRun(object):
+
+    def _get_db(self):
+        return shelve.open('lastrun')
+
+    def __enter__(self):
+        self.lastrun_db = self._get_db()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.lastrun_db.close()
+
+    @staticmethod
+    def get_last_run():
+        with LastRun() as lr:
+            return lr.lastrun_db.get('last_run_time') or None
+
+    @staticmethod
+    def set_last_run():
+        with LastRun() as lr:
+            lr.lastrun_db['last_run_time'] = datetime.datetime.now()
+
+    @staticmethod
+    def save_plugin_info(plugin, info):
+        with LastRun() as lr:
+            lr.lastrun_db[plugin.__class__.__name__] = info
+            return
+
+    @staticmethod
+    def get_plugin_info(plugin):
+        with LastRun() as lr:
+            return lr.lastrun_db.get(plugin.__name__, {})
+
 
 class PluginMount(type):
     def __init__(cls, name, bases, attrs):
@@ -19,7 +56,9 @@ class PluginMount(type):
 
         # create a plugin instance and store it
         # optionally you could just store the plugin class and lazily instantiate
-        instance = plugin()
+        last_run = LastRun.get_last_run()
+        plugin_context = LastRun.get_plugin_info(plugin)
+        instance = plugin(dict(last_run=last_run, cache=plugin_context))
         print "registering plugin", instance
 
         # save the plugin reference
@@ -58,6 +97,18 @@ class Plugin(object):
         ::location (optional)
         """
         raise NotImplemented("You must implement `run` from within your plugin")
+
+    def cache_data(self):
+        """
+        Return a dictionary of information that you'd like to store and pass to the plugin
+        the next time it's run.
+        """
+        return None
+
+    def on_success(self):
+        if self.cache_data() is not None:
+            print "caching data"
+            LastRun.save_plugin_info(self, self.cache_data())
 
 
 class Plugins(list):
