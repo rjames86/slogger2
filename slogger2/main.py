@@ -1,6 +1,6 @@
 from registry import Plugins
 from writers import PlistWriter, Writers
-from logging import setup_custom_logger
+from log import setup_custom_logger
 
 logger = setup_custom_logger('slogger2')
 
