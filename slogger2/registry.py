@@ -73,6 +73,9 @@ class Plugin(object):
     starred = False
     location = None
 
+    def __repr__(self):
+        return "<Plugin(%r)>" % self.__class__.__name__
+
     def load(self, *paths):
         paths = list(paths)
         for _, name, _ in pkgutil.iter_modules(paths):
