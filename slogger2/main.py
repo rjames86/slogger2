@@ -4,16 +4,14 @@ from writers import PlistWriter, Writers
 def main():
     plugins = Plugins.get()
     dayone_entries = []
-    print "getting dayone entries"
     for plugin in plugins:
         try:
             dayone_entries.extend(plugin.run())
-            print "creating writers"
             to_write = Writers.from_entries(map(PlistWriter, dayone_entries))
-            print "writing..."
             # to_write.write("/Users/rjames/Library/Group Containers/5U8NS4GX82.dayoneapp2/Data/Auto Import/Default Journal.dayone")
-        except:
-            print "failed. skipping"
+            to_write.write("/Users/rjames/Dropbox/Apps/Day One/Journal.dayone")
+        except Exception as e:
+            import pdb; pdb.set_trace()
             continue
         else:
             plugin.on_success()

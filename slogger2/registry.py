@@ -59,7 +59,6 @@ class PluginMount(type):
         last_run = LastRun.get_last_run()
         plugin_context = LastRun.get_plugin_info(plugin)
         instance = plugin(dict(last_run=last_run, cache=plugin_context))
-        print "registering plugin", instance
 
         # save the plugin reference
         cls.plugins.append(instance)
@@ -79,7 +78,6 @@ class Plugin(object):
         for _, name, _ in pkgutil.iter_modules(paths):
             fid, pathname, desc = imp.find_module(name, paths)
             try:
-                print name, fid, pathname, desc
                 imp.load_module(name, fid, pathname, desc)
             except Exception as e:
                 print "could not load plugin module '%s': %s" % (pathname, e.message)
@@ -107,7 +105,6 @@ class Plugin(object):
 
     def on_success(self):
         if self.cache_data() is not None:
-            print "caching data"
             LastRun.save_plugin_info(self, self.cache_data())
         LastRun.set_last_run()
 

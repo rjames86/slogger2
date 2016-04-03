@@ -33,12 +33,10 @@ class Image(object):
         return self._as_string
 
     def save_to_file(self, journal_location, uuid):
-        print "saving image to file"
         with open(os.path.join(journal_location, "photos", "%s.jpg" % uuid), 'wb') as f:
             f.write(self.as_string)
 
     def download_file(self):
-        print "downloading image", self.url
         to_ret = ""
         r = requests.get(self.url, stream=True)
         for chunk in r.iter_content(chunk_size=1024):
@@ -49,12 +47,11 @@ class Image(object):
 
 class DayOneEntry(object):
     def __init__(self, entry_text, created=None, tags=None, location=None, starred=False, image=None):
-        print "dayone entry creating"
         assert (isinstance(location, Location) or not location), "location must be an instance of Location"
         assert (isinstance(image, Image) or not image), "image must be an instance of Image"
 
         self.entry_text = entry_text
-        self._created = created
+        self.created = created
         self.tags = tags
         self.location = location
         self.starred = starred
@@ -62,17 +59,13 @@ class DayOneEntry(object):
 
         self._uuid = None
 
-    @property
-    def created(self):
-        return self._created.isoformat()
-
     def __repr__(self):
         return "<DayOneEntry(%r)" % self.uuid
 
     @property
     def uuid(self):
         if not self._uuid:
-            md5_entry_text = md5.new(self.entry_text)
+            md5_entry_text = md5.new(self.entry_text.encode('utf-8'))
             self._uuid = str(uuid.uuid3(uuid.NAMESPACE_DNS, md5_entry_text.digest())).replace('-', '')
         return self._uuid
 

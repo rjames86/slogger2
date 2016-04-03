@@ -13,6 +13,9 @@ class BaseWriter(object):
             'Tags': self.dayone_entry.tags,
             'Starred': self.dayone_entry.starred,
             'Entry Text': self.dayone_entry.entry_text,
+            'Creator': {
+                'Software Agent': 'Slogger 2'
+            }
         }
         if self.dayone_entry.location:
             to_ret['Location'] = self.dayone_entry.location.to_dict()
@@ -26,7 +29,6 @@ class BaseWriter(object):
             self.dayone_entry.image.save_to_file(journal_location, self.dayone_entry.uuid)
 
     def write(self, journal_location):
-        print "writing entry", self.dayone_entry.uuid
         with open(os.path.join(journal_location, "entries", "%s.doentry" % self.dayone_entry.uuid), 'w') as f:
             f.write(self.generate())
         ## the dayone object should just be stored in the image class
