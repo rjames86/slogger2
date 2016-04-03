@@ -1,6 +1,10 @@
 import plistlib
 import os
 
+import logging
+
+logger = logging.getLogger('slogger2')
+
 
 class BaseWriter(object):
     def __init__(self, dayone_entry):
@@ -29,7 +33,9 @@ class BaseWriter(object):
             self.dayone_entry.image.save_to_file(journal_location, self.dayone_entry.uuid)
 
     def write(self, journal_location):
-        with open(os.path.join(journal_location, "entries", "%s.doentry" % self.dayone_entry.uuid), 'w') as f:
+        filename = "%s.doentry" % self.dayone_entry.uuid
+        with open(os.path.join(journal_location, "entries", filename), 'w') as f:
+            logger.info("Writing entry %s to %s " % (self.dayone_entry, filename))
             f.write(self.generate())
         ## the dayone object should just be stored in the image class
         self.save_images(journal_location)

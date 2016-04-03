@@ -4,6 +4,11 @@ import requests
 import os
 
 
+import logging
+
+logger = logging.getLogger('slogger2')
+
+
 class Location(object):
     def __init__(self, administrative_area=None, latitude=None, longitude=None, place_name=None):
         self.administrative_area = administrative_area
@@ -33,7 +38,9 @@ class Image(object):
         return self._as_string
 
     def save_to_file(self, journal_location, uuid):
-        with open(os.path.join(journal_location, "photos", "%s.jpg" % uuid), 'wb') as f:
+        filename = "%s.jpg" % uuid
+        with open(os.path.join(journal_location, "photos", filename), 'wb') as f:
+            logger.info("Saving image %s" % filename)
             f.write(self.as_string)
 
     def download_file(self):
